@@ -1,0 +1,44 @@
+appId: com.ethernia.launcher
+productName: Ethernia Launcher
+copyright: Copyright (c) 2026 Ethernia
+
+directories:
+  output: dist
+  buildResources: build
+
+files:
+  - src/**/*
+  - package.json
+  - launcher.config.json
+  - "!**/*.map"
+
+asar: true
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: build/icon.ico
+  artifactName: "EthernicaLauncher-Setup-${version}.${ext}"
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  allowElevation: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: Ethernia Launcher
+  include: build/installer.nsh
+  artifactName: "EthernicaLauncher-Setup-${version}.${ext}"
+
+# Auto-update via GitHub Releases.
+# Le owner/repo sont lus depuis launcher.config.json côté runtime, mais
+# electron-builder a besoin de les connaître au moment du `--publish` aussi.
+# Si tu as un repo différent : édite ces lignes ET launcher.config.json.
+publish:
+  provider: github
+  owner: KrAKlDeath
+  repo: EthernicaLauncher
+  releaseType: release

@@ -1,0 +1,5 @@
+Place ici une image bg.jpg (1600x500+ recommandé) — paysage Ethernia, screenshot
+in-game ou key art. Elle est utilisée comme fond du hero de l'onglet Jouer.
+
+Si tu ne mets pas de bg.jpg, le hero affichera juste le dégradé radial cyan/rouge
+défini dans styles.css — ça reste joli, pas bloquant.

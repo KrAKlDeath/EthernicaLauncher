@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; script-src 'self';" />
+  <title>Ethernia Launcher</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">E</div>
+        <div class="brand-text">
+          <div class="brand-name">ETHERNIA</div>
+          <div class="brand-sub">Arclight 1.20.1</div>
+        </div>
+      </div>
+
+      <nav class="tabs">
+        <button class="tab active" data-tab="play">
+          <span class="tab-icon">▶</span><span>Jouer</span>
+        </button>
+        <button class="tab" data-tab="settings">
+          <span class="tab-icon">⚙</span><span>Paramètres</span>
+        </button>
+      </nav>
+
+      <div class="account" id="account">
+        <div class="account-avatar" id="account-avatar"></div>
+        <div class="account-info">
+          <div class="account-name" id="account-name">Non connecté</div>
+          <button class="link" id="account-action">Se connecter</button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="content">
+      <!-- ============== PLAY TAB ============== -->
+      <section class="panel active" data-panel="play">
+        <div class="play-hero">
+          <div class="play-hero-overlay"></div>
+          <div class="play-hero-content">
+            <div class="play-hero-eyebrow">Serveur officiel</div>
+            <h1 class="play-hero-title" id="server-name">Ethernia — Arclight</h1>
+            <div class="play-hero-meta">
+              <span id="server-host">play.ethernia.example.com</span>
+              <span class="dot">•</span>
+              <span id="server-version">MC 1.20.1 / Forge 47.4.18</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="play-bar">
+          <div class="play-status">
+            <div class="play-status-label" id="status-label">Prêt</div>
+            <div class="play-progress">
+              <div class="play-progress-fill" id="progress-fill"></div>
+            </div>
+            <div class="play-status-sub" id="status-sub"></div>
+          </div>
+          <button class="btn-play" id="btn-play">
+            <span class="btn-play-icon">▶</span>
+            <span class="btn-play-text">JOUER</span>
+          </button>
+        </div>
+
+        <div id="updater-banner" class="banner hidden">
+          <div class="banner-text" id="updater-text"></div>
+          <button class="link" id="updater-install">Redémarrer</button>
+        </div>
+      </section>
+
+      <!-- ============== SETTINGS TAB ============== -->
+      <section class="panel" data-panel="settings">
+        <h2 class="panel-title">Paramètres</h2>
+
+        <div class="setting">
+          <label class="setting-label">Mémoire allouée (RAM)</label>
+          <div class="setting-row">
+            <input type="range" id="ram-slider" min="2" max="16" step="1" />
+            <span class="setting-value" id="ram-value">6 Go</span>
+          </div>
+          <div class="setting-hint">Recommandé : 6 Go. Avec beaucoup de mods et VFX, monte jusqu'à 8-10 Go.</div>
+        </div>
+
+        <div class="setting">
+          <label class="setting-label">Dossier du jeu</label>
+          <div class="setting-row">
+            <input type="text" id="gamedir-input" readonly />
+            <button class="btn-secondary" id="gamedir-pick">Changer</button>
+            <button class="btn-secondary" id="gamedir-open">Ouvrir</button>
+          </div>
+          <div class="setting-hint">Les mods, configs et sauvegardes seront installés ici. Séparé du .minecraft vanilla.</div>
+        </div>
+
+        <div class="setting">
+          <label class="setting-label">Arguments JVM additionnels (avancé)</label>
+          <input type="text" id="jvm-input" placeholder="-XX:+UseG1GC -XX:+ParallelRefProcEnabled" />
+          <div class="setting-hint">Laisse vide si tu ne sais pas. Ces args sont ajoutés à ceux par défaut.</div>
+        </div>
+
+        <div class="setting">
+          <label class="setting-toggle">
+            <input type="checkbox" id="close-on-launch" />
+            <span>Fermer le launcher au démarrage du jeu</span>
+          </label>
+        </div>
+
+        <div class="setting setting-meta">
+          <div><span class="meta-key">Launcher</span> <span class="meta-val" id="meta-launcher">—</span></div>
+          <div><span class="meta-key">Minecraft</span> <span class="meta-val" id="meta-mc">—</span></div>
+          <div><span class="meta-key">Forge</span> <span class="meta-val" id="meta-forge">—</span></div>
+          <div class="setting-actions">
+            <button class="btn-secondary" id="check-updates">Vérifier les mises à jour</button>
+            <button class="btn-secondary" id="logout-btn">Se déconnecter</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

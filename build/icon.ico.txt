@@ -1,0 +1,7 @@
+Place ici icon.ico (256x256, multi-tailles) — icône du launcher Windows.
+electron-builder utilise ce fichier pour l'.exe, le raccourci bureau et le
+menu démarrer.
+
+Tu peux générer un .ico à partir d'un PNG via :
+  - https://www.icoconverter.com/   (en ligne)
+  - magick convert logo.png -define icon:auto-resize=256,128,64,48,32,16 icon.ico
