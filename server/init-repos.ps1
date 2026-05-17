@@ -9,7 +9,7 @@ param(
     [string]$LauncherRepo = "EthernicaLauncher",
     [string]$ClientRepo = "EthernicaClient",
     [switch]$ClientRepoPrivate,
-    [string]$ServerModsDir = "$HOME\your-project\Serveur Ethernia Arclight 1.20.1\mods"
+    [string]$ClientDir = "$env:APPDATA\.minecraft"
 )
 
 # On NE PAS utiliser ErrorActionPreference=Stop : les natifs (gh, git) retournent
@@ -127,13 +127,23 @@ Mods et fichiers client du serveur Ethernia. Synchronise par le launcher.
     }
     Copy-Item "$launcherRoot\server\generate-manifest.py" "generate-manifest.py" -Force
 
-    if (Test-Path $ServerModsDir) {
-        Write-Host "    copie mods depuis $ServerModsDir..."
-        Copy-Item "$ServerModsDir\*.jar" "mods\" -Force -ErrorAction SilentlyContinue
+    if (Test-Path $ClientDir) {
+        Write-Host "    copie depuis $ClientDir (mods + config + resourcepacks)..."
+        foreach ($sub in @(@{Name="mods";Pattern="*.jar"}, @{Name="config";Pattern=$null}, @{Name="resourcepacks";Pattern=$null})) {
+            $srcSub = Join-Path $ClientDir $sub.Name
+            if (-not (Test-Path $srcSub)) { continue }
+            if ($sub.Pattern) {
+                Copy-Item "$srcSub\$($sub.Pattern)" "$($sub.Name)\" -Force -ErrorAction SilentlyContinue
+            } else {
+                Copy-Item "$srcSub\*" "$($sub.Name)\" -Recurse -Force -ErrorAction SilentlyContinue
+            }
+        }
         $modCount = (Get-ChildItem "mods\*.jar" -ErrorAction SilentlyContinue).Count
-        Write-Host "    $modCount mods copies"
+        $cfgCount = (Get-ChildItem "config" -Recurse -File -ErrorAction SilentlyContinue).Count
+        $rpCount = (Get-ChildItem "resourcepacks" -Recurse -File -ErrorAction SilentlyContinue).Count
+        Write-Host "    $modCount mods, $cfgCount config files, $rpCount resourcepack files"
     } else {
-        Write-Host "    !! Dossier mods serveur introuvable : $ServerModsDir" -ForegroundColor Yellow
+        Write-Host "    !! Dossier client Minecraft introuvable : $ClientDir" -ForegroundColor Yellow
     }
 
     Write-Host "    Generation manifest.json..."

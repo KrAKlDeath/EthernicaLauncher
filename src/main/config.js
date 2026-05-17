@@ -22,14 +22,17 @@ function loadUserConfig() {
     path.join(process.resourcesPath || '', 'app.asar', 'launcher.config.json'),
     path.join(process.resourcesPath || '', 'launcher.config.json'),
   ];
+  let lastErr = null;
   for (const p of candidates) {
     try {
       if (fs.existsSync(p)) {
-        return JSON.parse(fs.readFileSync(p, 'utf8'));
+        // Strip UTF-8 BOM si present (PowerShell ConvertTo-Json l'ajoute parfois)
+        const raw = fs.readFileSync(p, 'utf8').replace(/^﻿/, '');
+        return JSON.parse(raw);
       }
-    } catch (_) { /* try next */ }
+    } catch (e) { lastErr = e; }
   }
-  throw new Error('launcher.config.json introuvable — assure-toi qu\'il est à la racine du projet.');
+  throw new Error('launcher.config.json introuvable ou invalide — ' + (lastErr ? lastErr.message : 'aucun candidat'));
 }
 
 const uc = loadUserConfig();

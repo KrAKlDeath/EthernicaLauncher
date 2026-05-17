@@ -5,3 +5,6 @@ dist/
 Thumbs.db
 .env
 .env.local
+
+# Contient le PAT GitHub - ne JAMAIS commit publiquement
+launcher.config.json

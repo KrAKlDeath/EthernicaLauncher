@@ -30,7 +30,12 @@ const config = require('./config');
 async function fetchManifest() {
   const { data } = await axios.get(config.MANIFEST_URL, {
     timeout: 15000,
-    headers: { 'Cache-Control': 'no-cache', ...config.clientHttpHeaders() },
+    decompress: false,
+    headers: {
+      'Cache-Control': 'no-cache',
+      'Accept-Encoding': 'identity',
+      ...config.clientHttpHeaders(),
+    },
   });
   return data;
 }
@@ -60,7 +65,14 @@ async function ensureFile(gameDir, entry, progress) {
   const res = await axios.get(url, {
     responseType: 'stream',
     timeout: 60000,
-    headers: config.clientHttpHeaders(),
+    // Identity encoding : raw.githubusercontent.com sert en gzip par defaut,
+    // axios decompresse mal le stream + le hash SHA-256 doit etre calcule
+    // sur les bytes IDENTIQUES a ceux du manifest. On force pas de compression.
+    decompress: false,
+    headers: {
+      'Accept-Encoding': 'identity',
+      ...config.clientHttpHeaders(),
+    },
     onDownloadProgress: (pe) => {
       if (progress) progress({ file: entry.path, loaded: pe.loaded, total: entry.size });
     },
