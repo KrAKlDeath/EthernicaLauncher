@@ -15,11 +15,11 @@ let mainWindow = null;
 
 function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 1100,
-    height: 680,
-    minWidth: 980,
-    minHeight: 600,
-    backgroundColor: '#0b0d12',
+    width: 1280,
+    height: 760,
+    minWidth: 1100,
+    minHeight: 680,
+    backgroundColor: '#0a1322',
     title: 'Ethernia Launcher',
     autoHideMenuBar: true,
     frame: true,

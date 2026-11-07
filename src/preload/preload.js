@@ -37,4 +37,8 @@ contextBridge.exposeInMainWorld('ethernia', {
     openExternal: (url) => ipcRenderer.invoke('shell:openExternal', url),
     openGameDir: () => ipcRenderer.invoke('shell:openGameDir'),
   },
+
+  server: {
+    status: () => ipcRenderer.invoke('server:status'),
+  },
 });

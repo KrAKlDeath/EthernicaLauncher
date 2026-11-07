@@ -1,6 +1,6 @@
 {
   "name": "ethernica-launcher",
-  "version": "1.0.0",
+  "version": "1.0.13",
   "description": "Launcher officiel du serveur Ethernia Arclight",
   "main": "src/main/main.js",
   "author": "Ethernia",

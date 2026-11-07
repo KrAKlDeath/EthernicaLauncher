@@ -11,6 +11,7 @@ const java = require('./java');
 const forge = require('./forge');
 const manifestSync = require('./manifest');
 const { LauncherRunner } = require('./launcher');
+const { pingMcServer } = require('./serverStatus');
 
 /**
  * Tous les handlers IPC entre renderer (preload.js) et main process.
@@ -86,6 +87,15 @@ function register(win, updater) {
   ipcMain.handle('shell:openExternal', (_e, url) => shell.openExternal(url));
   ipcMain.handle('shell:openGameDir', () => shell.openPath(store.get('gameDir')));
 
+  // Server status via Server List Ping natif (resout SRV + parse MC protocole)
+  ipcMain.handle('server:status', async () => {
+    try {
+      return await pingMcServer(config.SERVER_HOST, config.SERVER_PORT, 5000);
+    } catch (e) {
+      return { online: false, players: 0, max: 0 };
+    }
+  });
+
   ipcMain.handle('launch:play', async () => {
     if (runner) return { ok: false, reason: 'already running' };
 
@@ -99,6 +109,10 @@ function register(win, updater) {
 
     try {
       progress({ step: 'syncing-files', current: 0, total: 0 });
+      // syncAll telecharge mods + config + resourcepacks + shaderpacks + le
+      // options.txt complet (GUI scale, FOV, keybinds, resourcePacks actifs).
+      // Le shader actif vient de config/oculus.properties (sync aussi).
+      // Donc plus rien a "appliquer" cote launcher : tout est mirrore.
       await manifestSync.syncAll(path.join(gameDir, '.minecraft'), progress);
 
       const javaBin = await java.ensureJava21(gameDir, progress);

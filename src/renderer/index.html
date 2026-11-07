@@ -3,79 +3,182 @@
 <head>
   <meta charset="UTF-8" />
   <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; script-src 'self';" />
+        content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://mc-heads.net; script-src 'self';" />
   <title>Ethernia Launcher</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <div class="app">
-    <aside class="sidebar">
-      <div class="brand">
-        <div class="brand-mark">E</div>
-        <div class="brand-text">
-          <div class="brand-name">ETHERNIA</div>
-          <div class="brand-sub">Arclight 1.20.1</div>
-        </div>
+  <div class="launcher">
+
+    <!-- ============= TOP BAR ============= -->
+    <header class="top-bar">
+      <div class="top-bar-crest left" aria-hidden="true">
+        <span class="crest-diamond">◆</span>
       </div>
 
-      <nav class="tabs">
-        <button class="tab active" data-tab="play">
-          <span class="tab-icon">▶</span><span>Jouer</span>
+      <div class="top-title">
+        <span class="title-orn left">✦</span>
+        <h1 class="title-text">
+          <span class="title-main">ETHERNIA</span>
+          <span class="title-sub">— LAUNCHER —</span>
+        </h1>
+        <span class="title-orn right">✦</span>
+      </div>
+
+      <div class="top-bar-crest right" aria-hidden="true">
+        <span class="crest-diamond">◆</span>
+      </div>
+
+      <div class="window-controls">
+        <button class="win-btn" id="open-settings" title="Paramètres">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 15.5A3.5 3.5 0 0 1 8.5 12 3.5 3.5 0 0 1 12 8.5a3.5 3.5 0 0 1 3.5 3.5 3.5 3.5 0 0 1-3.5 3.5m7.43-2.53c.04-.32.07-.64.07-.97 0-.33-.03-.66-.07-1l2.11-1.63a.5.5 0 0 0 .12-.64l-2-3.46a.5.5 0 0 0-.61-.22l-2.49 1c-.52-.39-1.06-.73-1.69-.98l-.37-2.65A.49.49 0 0 0 14 2h-4a.49.49 0 0 0-.5.42l-.37 2.65c-.63.25-1.17.59-1.69.98l-2.49-1a.5.5 0 0 0-.61.22l-2 3.46a.5.5 0 0 0 .12.64L4.57 11c-.04.34-.07.67-.07 1 0 .33.03.65.07.97l-2.11 1.66a.5.5 0 0 0-.12.64l2 3.46a.5.5 0 0 0 .61.22l2.49-1.01c.52.4 1.06.74 1.69.99l.37 2.65c.05.24.26.42.5.42h4c.24 0 .45-.18.5-.42l.37-2.65c.63-.26 1.17-.59 1.69-.99l2.49 1.01a.5.5 0 0 0 .61-.22l2-3.46a.5.5 0 0 0-.12-.64l-2.11-1.66Z"/></svg>
         </button>
-        <button class="tab" data-tab="settings">
-          <span class="tab-icon">⚙</span><span>Paramètres</span>
+        <button class="win-btn" id="profile-btn" title="Compte">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 4a4 4 0 0 1 4 4 4 4 0 0 1-4 4 4 4 0 0 1-4-4 4 4 0 0 1 4-4m0 10c4.42 0 8 1.79 8 4v2H4v-2c0-2.21 3.58-4 8-4Z"/></svg>
         </button>
+        <button class="win-btn notif" id="notif-btn" title="Notifications">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M12 22a2 2 0 0 0 2-2h-4a2 2 0 0 0 2 2m6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4a1.5 1.5 0 0 0-3 0v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1Z"/></svg>
+          <span class="notif-badge hidden" id="notif-count">1</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- ============= TAGLINE ============= -->
+    <div class="tagline">
+      <span class="tagline-orn">◆</span>
+      <span class="tagline-text">Un monde fantastique et amélioré vous attend</span>
+      <span class="tagline-orn">◆</span>
+    </div>
+
+    <!-- ============= HERO ============= -->
+    <section class="hero">
+      <div class="hero-image"></div>
+      <div class="hero-frame"></div>
+      <div class="hero-vignette"></div>
+    </section>
+
+    <!-- ============= CARDS ============= -->
+    <section class="cards">
+
+      <!-- Card 1: Articles -->
+      <article class="card card-articles">
+        <header class="card-header">
+          <span class="card-orn">◆</span>
+          <h3>Articles de la communauté</h3>
+        </header>
+        <div class="card-body">
+          <div class="article-row">
+            <div class="article-thumb"></div>
+            <div class="article-title">Mise à jour 1.4 : L'éveil des éléments</div>
+          </div>
+          <div class="article-row">
+            <div class="article-thumb alt"></div>
+            <div class="article-title">Nouveau donjon : Cathédrale d'Ombre</div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Card 2: News -->
+      <article class="card card-news">
+        <header class="card-header">
+          <span class="card-orn">◆</span>
+          <h3>Nouveautés &amp; mises à jour</h3>
+        </header>
+        <div class="card-body">
+          <h4 class="news-title">Mise à jour <span id="news-version">1.0.3</span> : L'éveil des éléments</h4>
+          <p class="news-text" id="news-body">Le launcher entre dans sa nouvelle ère. Interface repensée, optimisations, prêt pour les futures vagues de mises à jour côté serveur.</p>
+          <button class="btn-ghost" id="news-more">En savoir plus</button>
+        </div>
+      </article>
+
+      <!-- Card 3: Server status -->
+      <article class="card card-status">
+        <header class="card-header">
+          <span class="card-orn">◆</span>
+          <h3>Statut du serveur</h3>
+        </header>
+        <div class="card-body status-body">
+          <div class="status-line">
+            <span class="status-dot" id="status-dot"></span>
+            <span class="status-text" id="status-text">Vérification...</span>
+          </div>
+          <div class="status-count" id="status-count">—</div>
+          <div class="status-label">joueurs en ligne</div>
+        </div>
+      </article>
+
+      <!-- Card 4: Account / Login -->
+      <article class="card card-account">
+        <header class="card-header">
+          <span class="card-orn">◆</span>
+          <h3 id="account-card-title">Se connecter</h3>
+        </header>
+        <div class="card-body" id="account-card-body">
+          <div class="account-logged-out" id="account-logged-out">
+            <div class="account-hint">Connecte-toi avec ton compte Microsoft pour rejoindre Ethernia.</div>
+            <button class="btn-ms" id="login-btn">
+              <span class="ms-icon">⊞</span>
+              <span>Compte Microsoft</span>
+            </button>
+          </div>
+          <div class="account-logged-in hidden" id="account-logged-in">
+            <div class="account-row">
+              <div class="account-avatar-big" id="account-avatar"></div>
+              <div class="account-info">
+                <div class="account-name" id="account-name">—</div>
+                <div class="account-status">Connecté</div>
+              </div>
+            </div>
+            <button class="btn-ghost" id="logout-btn">Se déconnecter</button>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <!-- ============= PROGRESS BAR (overlay during sync) ============= -->
+    <div class="progress-overlay hidden" id="progress-overlay">
+      <div class="progress-info">
+        <span class="progress-label" id="progress-label">Préparation…</span>
+        <span class="progress-pct" id="progress-pct">0%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+      <div class="progress-sub" id="progress-sub"></div>
+    </div>
+
+    <!-- ============= BOTTOM BAR ============= -->
+    <footer class="bottom-bar">
+      <nav class="bottom-links">
+        <a href="#" data-link="support">SUPPORT</a>
+        <span class="link-sep">·</span>
+        <a href="#" data-link="boutique">BOUTIQUE</a>
+        <span class="link-sep">·</span>
+        <a href="#" data-link="site">SITE WEB</a>
       </nav>
 
-      <div class="account" id="account">
-        <div class="account-avatar" id="account-avatar"></div>
-        <div class="account-info">
-          <div class="account-name" id="account-name">Non connecté</div>
-          <button class="link" id="account-action">Se connecter</button>
-        </div>
+      <button class="btn-play" id="btn-play">
+        <span class="btn-play-glow"></span>
+        <span class="btn-play-text">JOUER</span>
+      </button>
+
+      <div class="version-tag">
+        Version <span id="meta-launcher">1.0.0</span>
       </div>
-    </aside>
+    </footer>
 
-    <main class="content">
-      <!-- ============== PLAY TAB ============== -->
-      <section class="panel active" data-panel="play">
-        <div class="play-hero">
-          <div class="play-hero-overlay"></div>
-          <div class="play-hero-content">
-            <div class="play-hero-eyebrow">Serveur officiel</div>
-            <h1 class="play-hero-title" id="server-name">Ethernia — Arclight</h1>
-            <div class="play-hero-meta">
-              <span id="server-host">play.ethernia.example.com</span>
-              <span class="dot">•</span>
-              <span id="server-version">MC 1.20.1 / Forge 47.4.18</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="play-bar">
-          <div class="play-status">
-            <div class="play-status-label" id="status-label">Prêt</div>
-            <div class="play-progress">
-              <div class="play-progress-fill" id="progress-fill"></div>
-            </div>
-            <div class="play-status-sub" id="status-sub"></div>
-          </div>
-          <button class="btn-play" id="btn-play">
-            <span class="btn-play-icon">▶</span>
-            <span class="btn-play-text">JOUER</span>
-          </button>
-        </div>
-
-        <div id="updater-banner" class="banner hidden">
-          <div class="banner-text" id="updater-text"></div>
-          <button class="link" id="updater-install">Redémarrer</button>
-        </div>
-      </section>
-
-      <!-- ============== SETTINGS TAB ============== -->
-      <section class="panel" data-panel="settings">
-        <h2 class="panel-title">Paramètres</h2>
-
+    <!-- ============= SETTINGS PANEL (slide-in) ============= -->
+    <aside class="settings-panel" id="settings-panel">
+      <header class="settings-header">
+        <h2>Paramètres</h2>
+        <button class="win-btn" id="close-settings" title="Fermer">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12Z"/></svg>
+        </button>
+      </header>
+      <div class="settings-body">
         <div class="setting">
           <label class="setting-label">Mémoire allouée (RAM)</label>
           <div class="setting-row">
@@ -92,13 +195,11 @@
             <button class="btn-secondary" id="gamedir-pick">Changer</button>
             <button class="btn-secondary" id="gamedir-open">Ouvrir</button>
           </div>
-          <div class="setting-hint">Les mods, configs et sauvegardes seront installés ici. Séparé du .minecraft vanilla.</div>
         </div>
 
         <div class="setting">
-          <label class="setting-label">Arguments JVM additionnels (avancé)</label>
-          <input type="text" id="jvm-input" placeholder="-XX:+UseG1GC -XX:+ParallelRefProcEnabled" />
-          <div class="setting-hint">Laisse vide si tu ne sais pas. Ces args sont ajoutés à ceux par défaut.</div>
+          <label class="setting-label">Arguments JVM (avancé)</label>
+          <input type="text" id="jvm-input" placeholder="-XX:+UseG1GC ..." />
         </div>
 
         <div class="setting">
@@ -109,16 +210,23 @@
         </div>
 
         <div class="setting setting-meta">
-          <div><span class="meta-key">Launcher</span> <span class="meta-val" id="meta-launcher">—</span></div>
           <div><span class="meta-key">Minecraft</span> <span class="meta-val" id="meta-mc">—</span></div>
           <div><span class="meta-key">Forge</span> <span class="meta-val" id="meta-forge">—</span></div>
+          <div><span class="meta-key">Serveur</span> <span class="meta-val" id="meta-server">—</span></div>
           <div class="setting-actions">
             <button class="btn-secondary" id="check-updates">Vérifier les mises à jour</button>
-            <button class="btn-secondary" id="logout-btn">Se déconnecter</button>
           </div>
         </div>
-      </section>
-    </main>
+      </div>
+    </aside>
+
+    <div class="settings-backdrop" id="settings-backdrop"></div>
+
+    <!-- ============= UPDATE BANNER ============= -->
+    <div class="banner hidden" id="updater-banner">
+      <span class="banner-text" id="updater-text"></span>
+      <button class="btn-ghost" id="updater-install">Redémarrer</button>
+    </div>
   </div>
 
   <script src="app.js"></script>
