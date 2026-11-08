@@ -102,20 +102,17 @@ function cleanStaleFiles(gameDir, manifest) {
   for (const dir of manifest.managedDirs || []) {
     const root = path.join(gameDir, dir);
     if (!fs.existsSync(root)) continue;
-    walk(root, (full) => {
-      const rel = path.relative(gameDir, full).replace(/\\/g, '/');
+    // Seuls les fichiers posés directement dans le dossier géré sont nettoyés.
+    // Les sous-dossiers appartiennent aux mods (ex. mods/mcef-libraries : Chromium
+    // extrait par MCEF, ~220 Mo) : les vider forçait une réextraction à chaque
+    // lancement et faisait planter le jeu si un ancien jcef_helper.exe les verrouillait.
+    for (const entry of fs.readdirSync(root, { withFileTypes: true })) {
+      if (!entry.isFile()) continue;
+      const rel = path.posix.join(dir.replace(/\\/g, '/'), entry.name);
       if (!wanted.has(rel)) {
-        try { fs.unlinkSync(full); } catch (_) {}
+        try { fs.unlinkSync(path.join(root, entry.name)); } catch (_) {}
       }
-    });
-  }
-}
-
-function walk(dir, cb) {
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    const full = path.join(dir, entry.name);
-    if (entry.isDirectory()) walk(full, cb);
-    else cb(full);
+    }
   }
 }
 
