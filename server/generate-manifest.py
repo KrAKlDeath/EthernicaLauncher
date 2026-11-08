@@ -24,7 +24,7 @@ import sys
 from pathlib import Path
 
 # Dossiers analysés (relatifs au .minecraft client) et fichiers isolés.
-SCAN_DIRS = ["mods", "shaderpacks", "resourcepacks", "config"]
+SCAN_DIRS = ["mods", "shaderpacks", "resourcepacks", "config", "data_driven"]
 SCAN_FILES = ["options.txt"]
 
 # Dossiers gérés : tout fichier local ABSENT du manifeste y est supprimé côté

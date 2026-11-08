@@ -5,6 +5,7 @@
 #   mods\*.jar           -> mods\        (géré : les mods retirés sont supprimés chez les joueurs)
 #   shaderpacks\*.zip    -> shaderpacks\
 #   config\*             -> config\      (fourni au 1er lancement seulement)
+#   data_driven\*        -> data_driven\ (packs d'animations Epic Fight pour SLM)
 #   options-ethernia.txt -> options.txt  (fourni au 1er lancement seulement)
 #
 # Usage :
@@ -52,6 +53,8 @@ Write-Host "==> $PackDir -> $ClientRepoPath" -ForegroundColor Cyan
 Sync-Dir "mods" "*.jar"
 Sync-Dir "shaderpacks" "*.zip"
 Sync-Dir "config" "*"
+# Packs d'animations Epic Fight lus par SLM (data_driven/slm_epicfight)
+Sync-Dir "data_driven" "*"
 # Ancien contenu Forge 1.20.1 à retirer du repo
 foreach ($old in @("resourcepacks", "keybinds.txt")) {
     $p = Join-Path $ClientRepoPath $old
