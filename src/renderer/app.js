@@ -5,6 +5,7 @@ const api = window.ethernia;
 
 let isLaunching = false;
 let updateReady = false;
+let updateBusy = false;
 let meta = null;
 
 // ============== INIT ==============
@@ -153,7 +154,7 @@ function wireLinks() {
 // ============== PLAY ==============
 function wirePlay() {
   $('#btn-play').addEventListener('click', async () => {
-    if (isLaunching) return;
+    if (isLaunching || updateBusy) return;
     const { profile } = await api.auth.status();
     if (!profile) {
       setProgress("Connecte-toi d'abord à ton compte Microsoft", 0, 'warn');
@@ -191,6 +192,10 @@ function wirePlay() {
   api.launch.onClosed((data) => {
     isLaunching = false;
     setButton(false);
+    if (updateReady) {
+      $('#updater-text').textContent = 'Installation de la mise à jour du launcher…';
+      setTimeout(() => api.updater.install(), 1500);
+    }
     setProgress(`Minecraft fermé (code ${data.code})`, 0);
     setTimeout(() => showProgress(false), 3000);
   });
@@ -231,8 +236,15 @@ function setProgress(label, pct, kind) {
 }
 function setButton(launching) {
   const b = $('#btn-play');
-  b.disabled = launching;
-  b.querySelector('.btn-play-text').textContent = launching ? 'EN COURS' : 'JOUER';
+  b.disabled = launching || updateBusy;
+  b.querySelector('.btn-play-text').textContent =
+    launching ? 'EN COURS' : updateBusy ? 'MISE À JOUR' : 'JOUER';
+}
+// Vérification / téléchargement / installation de mise à jour en cours :
+// JOUER reste grisé (le processus principal refuse aussi le lancement).
+function setUpdateBusy(busy) {
+  updateBusy = busy;
+  setButton(isLaunching);
 }
 
 // ============== UPDATER ==============
@@ -242,28 +254,42 @@ function wireUpdater() {
     const text = $('#updater-text');
     const notifBadge = $('#notif-count');
     switch (d.step) {
+      case 'checking':
+        if (!isLaunching) setUpdateBusy(true);
+        break;
       case 'available':
         banner.classList.remove('hidden');
         notifBadge.classList.remove('hidden');
         text.textContent = `Mise à jour ${d.version} en cours de téléchargement…`;
+        setUpdateBusy(true);
         break;
       case 'downloading':
         banner.classList.remove('hidden');
         text.textContent = `Téléchargement mise à jour : ${Math.round(d.percent || 0)}%`;
+        setUpdateBusy(true);
         break;
       case 'ready':
         banner.classList.remove('hidden');
         notifBadge.classList.remove('hidden');
-        text.textContent = `Mise à jour ${d.version} prête.`;
         updateReady = true;
+        setUpdateBusy(true);
+        if (isLaunching) {
+          // Une partie tourne : on installera quand elle sera fermée.
+          text.textContent = `Mise à jour ${d.version} prête — installée à la fermeture du jeu.`;
+        } else {
+          text.textContent = `Mise à jour ${d.version} prête — redémarrage du launcher…`;
+          setTimeout(() => api.updater.install(), 1500);
+        }
         break;
       case 'error':
         banner.classList.remove('hidden');
         text.textContent = 'Erreur de mise à jour.';
+        setUpdateBusy(false);
         break;
       case 'none':
         banner.classList.add('hidden');
         notifBadge.classList.add('hidden');
+        setUpdateBusy(false);
         break;
     }
   });

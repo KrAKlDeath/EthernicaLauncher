@@ -80,6 +80,8 @@ function register(win, updater) {
 
   ipcMain.handle('updater:install', () => {
     if (!updater) return { ok: false };
+    // Jamais pendant une partie : le launcher se fermerait sous le jeu.
+    if (runner) return { ok: false, reason: 'game-running' };
     updater.quitAndInstall();
     return { ok: true };
   });
@@ -98,6 +100,9 @@ function register(win, updater) {
 
   ipcMain.handle('launch:play', async () => {
     if (runner) return { ok: false, reason: 'already running' };
+    if (updater && updater.blocksPlay && updater.blocksPlay()) {
+      return { ok: false, reason: 'Mise à jour du launcher en cours, patiente quelques secondes.' };
+    }
 
     let authPayload = await auth.refreshSilent();
     if (!authPayload) {

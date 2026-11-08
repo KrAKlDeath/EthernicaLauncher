@@ -16,11 +16,23 @@ function setupUpdater(win) {
   autoUpdater.autoDownload = true;
   autoUpdater.autoInstallOnAppQuit = true;
 
+  // État courant : JOUER est bloqué tant qu'une vérification ou une mise à jour
+  // est en cours (lancer le jeu pendant que le launcher se remplace casse tout).
+  let state = 'idle';
+  let checkTimer = null;
   const send = (event, data) => {
+    state = data.step;
     if (win && !win.isDestroyed()) win.webContents.send(event, data);
   };
 
-  autoUpdater.on('checking-for-update', () => send('updater', { step: 'checking' }));
+  autoUpdater.on('checking-for-update', () => {
+    send('updater', { step: 'checking' });
+    // Sécurité : une vérification qui ne répond pas ne bloque pas JOUER indéfiniment.
+    clearTimeout(checkTimer);
+    checkTimer = setTimeout(() => {
+      if (state === 'checking') send('updater', { step: 'none' });
+    }, 20000);
+  });
   autoUpdater.on('update-available', (info) =>
     send('updater', { step: 'available', version: info.version })
   );
@@ -41,6 +53,8 @@ function setupUpdater(win) {
   return {
     check: () => autoUpdater.checkForUpdates(),
     quitAndInstall: () => autoUpdater.quitAndInstall(true, true),
+    blocksPlay: () => ['checking', 'available', 'downloading', 'ready'].includes(state),
+    state: () => state,
   };
 }
 
