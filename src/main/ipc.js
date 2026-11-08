@@ -10,6 +10,7 @@ const auth = require('./auth');
 const java = require('./java');
 const neoforge = require('./neoforge');
 const manifestSync = require('./manifest');
+const mcef = require('./mcef');
 const { LauncherRunner } = require('./launcher');
 const { pingMcServer } = require('./serverStatus');
 
@@ -119,6 +120,10 @@ function register(win, updater) {
       // Le shader actif vient de config/iris.properties (fourni au 1er lancement).
       // Donc plus rien a "appliquer" cote launcher : tout est mirrore.
       await manifestSync.syncAll(path.join(gameDir, '.minecraft'), progress);
+      // Chromium de MCEF à moitié téléchargé/extrait → on l'efface pour un
+      // retéléchargement propre (sinon crash d3dcompiler_47.dll au démarrage).
+      const mcefFix = mcef.repairMcef(path.join(gameDir, '.minecraft'));
+      if (mcefFix) console.log('[mcef] dossier réinitialisé :', mcefFix);
 
       const javaBin = await java.ensureJava21(gameDir, progress);
       const versionId = await neoforge.ensureNeoForge(gameDir, javaBin, progress);
