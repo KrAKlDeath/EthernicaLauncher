@@ -8,7 +8,7 @@ const config = require('./config');
 const store = require('./store');
 const auth = require('./auth');
 const java = require('./java');
-const forge = require('./forge');
+const neoforge = require('./neoforge');
 const manifestSync = require('./manifest');
 const { LauncherRunner } = require('./launcher');
 const { pingMcServer } = require('./serverStatus');
@@ -28,7 +28,7 @@ function register(win, updater) {
   ipcMain.handle('app:meta', () => ({
     version: app.getVersion(),
     mcVersion: config.MC_VERSION,
-    forgeVersion: config.FORGE_FULL,
+    loaderVersion: `NeoForge ${config.NEOFORGE_VERSION}`,
     serverHost: config.SERVER_HOST,
     serverPort: config.SERVER_PORT,
     serverName: config.SERVER_NAME,
@@ -111,18 +111,18 @@ function register(win, updater) {
       progress({ step: 'syncing-files', current: 0, total: 0 });
       // syncAll telecharge mods + config + resourcepacks + shaderpacks + le
       // options.txt complet (GUI scale, FOV, keybinds, resourcePacks actifs).
-      // Le shader actif vient de config/oculus.properties (sync aussi).
+      // Le shader actif vient de config/iris.properties (fourni au 1er lancement).
       // Donc plus rien a "appliquer" cote launcher : tout est mirrore.
       await manifestSync.syncAll(path.join(gameDir, '.minecraft'), progress);
 
       const javaBin = await java.ensureJava21(gameDir, progress);
-      const forgeJar = await forge.ensureForgeInstaller(gameDir, progress);
+      const versionId = await neoforge.ensureNeoForge(gameDir, javaBin, progress);
 
       runner = new LauncherRunner();
       await runner.launch({
         gameDir,
         javaBin,
-        forgeJar,
+        versionId,
         auth: authPayload,
         onProgress: progress,
         onClose: (code) => {

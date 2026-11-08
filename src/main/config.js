@@ -37,12 +37,14 @@ function loadUserConfig() {
 
 const uc = loadUserConfig();
 
-// === Versions MC / Forge ===
-const MC_VERSION = uc.minecraft || '1.20.1';
-const FORGE_VERSION = uc.forge || '47.4.18';
-const FORGE_FULL = `${MC_VERSION}-${FORGE_VERSION}`;
-const FORGE_INSTALLER_URL =
-  `https://maven.minecraftforge.net/net/minecraftforge/forge/${FORGE_FULL}/forge-${FORGE_FULL}-installer.jar`;
+// === Versions MC / NeoForge ===
+const MC_VERSION = uc.minecraft || '1.21.1';
+const NEOFORGE_VERSION = uc.neoforge || '21.1.228';
+const NEOFORGE_ID = `neoforge-${NEOFORGE_VERSION}`;
+const NEOFORGE_INSTALLER_URL =
+  `https://maven.neoforged.net/releases/net/neoforged/neoforge/${NEOFORGE_VERSION}/neoforge-${NEOFORGE_VERSION}-installer.jar`;
+/** Protocole réseau de la version (ping du serveur). 1.21.1 = 767. */
+const MC_PROTOCOL = uc.protocol || 767;
 
 // === Java ===
 const JAVA_VERSION = 21;
@@ -78,9 +80,10 @@ module.exports = {
   clientHttpHeaders,
 
   MC_VERSION,
-  FORGE_VERSION,
-  FORGE_FULL,
-  FORGE_INSTALLER_URL,
+  MC_PROTOCOL,
+  NEOFORGE_VERSION,
+  NEOFORGE_ID,
+  NEOFORGE_INSTALLER_URL,
 
   JAVA_VERSION,
   JAVA_TEMURIN_WIN_X64,

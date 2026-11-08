@@ -41,7 +41,7 @@ Si ton repo doit être **privé** (recommandé, parce que tu héberges des mods 
 Ce script :
 - Crée le repo `EthernicaLauncher` (code source du launcher)
 - Crée le repo `EthernicaClient` (mods + manifest pour sync joueurs)
-- Copie tes 47 mods Forge depuis `Serveur Ethernia Arclight 1.20.1/mods/` vers le repo client
+- Copie le pack client `Desktop\Ethernia\client-pack` vers le repo client (`.\server\sync-mods.ps1`)
 - Génère `manifest.json` et push tout sur GitHub
 
 ---
@@ -128,7 +128,7 @@ Ce lien est **permanent** — `/latest/download/` redirige toujours vers la dern
 ```
 
 Ce script :
-- Copie tes mods depuis `Serveur Ethernia Arclight 1.20.1/mods/` vers le repo `EthernicaClient`
+- Mets à jour `Desktop\Ethernia\client-pack` puis lance `.\server\sync-mods.ps1` (repo `EthernicaClient`)
 - Régénère `manifest.json` (hash SHA-256 par fichier)
 - `git commit` + `git push`
 - Les joueurs récupèrent la diff au prochain clic **JOUER**

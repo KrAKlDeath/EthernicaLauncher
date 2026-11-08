@@ -1,70 +1,86 @@
-﻿# Sync ton client Minecraft (.minecraft\mods + config + resourcepacks) vers le
-# repo EthernicaClient + push GitHub.
+﻿# Prépare le repo EthernicaClient à partir du pack client Ethernia (NeoForge 1.21.1)
+# puis le pousse sur GitHub. Les joueurs récupèrent la différence au prochain JOUER.
 #
-# Source de verite = ton dossier client. Strategie : sync AGRESSIF total.
-# Chez tes amis, mods/ + config/ + resourcepacks/ sont remplaces a l'identique
-# au prochain JOUER (le launcher delete ce qui n'est plus dans le manifest).
+# Source de vérité = Desktop\Ethernia\client-pack :
+#   mods\*.jar           -> mods\        (géré : les mods retirés sont supprimés chez les joueurs)
+#   shaderpacks\*.zip    -> shaderpacks\
+#   config\*             -> config\      (fourni au 1er lancement seulement)
+#   options-ethernia.txt -> options.txt  (fourni au 1er lancement seulement)
 #
 # Usage :
-#   .\server\sync-mods.ps1
-#   .\server\sync-mods.ps1 -ClientDir "C:\autre\.minecraft"
+#   .\server\sync-mods.ps1                 # prépare + commit + push
+#   .\server\sync-mods.ps1 -NoPush         # prépare + manifest, sans rien envoyer
+#   .\server\sync-mods.ps1 -ClientRepoPath "D:\EthernicaClient"
+#
+# Premier usage : clone le repo client à côté du projet :
+#   git clone https://github.com/KrAKlDeath/EthernicaClient "$HOME\Desktop\Ethernia\client-repo"
 
 param(
-    [string]$ClientDir = "$env:APPDATA\.minecraft",
-    [string]$ClientRepoPath = "$HOME\your-project\EthernicaClient"
+    [string]$PackDir = (Join-Path $PSScriptRoot "..\..\client-pack"),
+    [string]$ClientRepoPath = (Join-Path $PSScriptRoot "..\..\client-repo"),
+    [switch]$NoPush
 )
 
-$ErrorActionPreference = "Continue"
+$ErrorActionPreference = "Stop"
 
+$PackDir = (Resolve-Path $PackDir).Path
 if (-not (Test-Path $ClientRepoPath)) {
-    Write-Host "Repo client introuvable : $ClientRepoPath. Lance init-repos.ps1 d'abord." -ForegroundColor Red
-    exit 1
+    if ($NoPush) {
+        New-Item -ItemType Directory -Path $ClientRepoPath -Force | Out-Null
+    } else {
+        Write-Host "Repo client introuvable : $ClientRepoPath" -ForegroundColor Red
+        Write-Host "Clone-le d'abord : git clone https://github.com/KrAKlDeath/EthernicaClient `"$ClientRepoPath`"" -ForegroundColor Yellow
+        exit 1
+    }
 }
-if (-not (Test-Path $ClientDir)) {
-    Write-Host "Dossier client Minecraft introuvable : $ClientDir" -ForegroundColor Red
-    exit 1
-}
+$ClientRepoPath = (Resolve-Path $ClientRepoPath).Path
 
 function Sync-Dir {
-    param($SrcRoot, $DstRoot, $SubDir, $Pattern)
-    $src = Join-Path $SrcRoot $SubDir
-    $dst = Join-Path $DstRoot $SubDir
-    if (-not (Test-Path $src)) {
-        Write-Host "    $SubDir : source absente, skip" -ForegroundColor Yellow
-        return
-    }
-    if (Test-Path $dst) { Remove-Item "$dst\*" -Recurse -Force -ErrorAction SilentlyContinue }
+    param($SubDir, $Pattern)
+    $src = Join-Path $PackDir $SubDir
+    $dst = Join-Path $ClientRepoPath $SubDir
+    if (Test-Path $dst) { Remove-Item (Join-Path $dst "*") -Recurse -Force }
     New-Item -ItemType Directory -Path $dst -Force | Out-Null
-    if ($Pattern) {
-        Copy-Item "$src\$Pattern" $dst -Force -ErrorAction SilentlyContinue
-    } else {
-        Copy-Item "$src\*" $dst -Recurse -Force -ErrorAction SilentlyContinue
+    if (Test-Path $src) {
+        Copy-Item (Join-Path $src $Pattern) $dst -Recurse -Force
     }
-    $count = (Get-ChildItem $dst -Recurse -File -ErrorAction SilentlyContinue).Count
+    $count = (Get-ChildItem $dst -Recurse -File).Count
     Write-Host "    $SubDir : $count fichiers" -ForegroundColor Green
+}
+
+Write-Host "==> $PackDir -> $ClientRepoPath" -ForegroundColor Cyan
+Sync-Dir "mods" "*.jar"
+Sync-Dir "shaderpacks" "*.zip"
+Sync-Dir "config" "*"
+# Ancien contenu Forge 1.20.1 à retirer du repo
+foreach ($old in @("resourcepacks", "keybinds.txt")) {
+    $p = Join-Path $ClientRepoPath $old
+    if (Test-Path $p) { Remove-Item $p -Recurse -Force; Write-Host "    $old : retiré" -ForegroundColor Yellow }
+}
+$opts = Join-Path $PackDir "options-ethernia.txt"
+if (Test-Path $opts) { Copy-Item $opts (Join-Path $ClientRepoPath "options.txt") -Force }
+
+Write-Host "==> manifest.json" -ForegroundColor Cyan
+$py = Get-Command python -ErrorAction SilentlyContinue
+if (-not $py) { $py = Get-Command python3 -ErrorAction SilentlyContinue }
+if (-not $py) { Write-Host "    python introuvable" -ForegroundColor Red; exit 1 }
+& $py.Source (Join-Path $PSScriptRoot "generate-manifest.py") $ClientRepoPath
+if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+if ($NoPush) {
+    Write-Host "==> -NoPush : rien n'a été envoyé." -ForegroundColor Yellow
+    exit 0
 }
 
 Push-Location $ClientRepoPath
 try {
-    Write-Host "==> Sync $ClientDir -> $ClientRepoPath" -ForegroundColor Cyan
-    Sync-Dir $ClientDir $ClientRepoPath "mods" "*.jar"
-    Sync-Dir $ClientDir $ClientRepoPath "config" $null
-    Sync-Dir $ClientDir $ClientRepoPath "resourcepacks" $null
-
-    Write-Host "==> Regeneration manifest.json..." -ForegroundColor Cyan
-    $py = Get-Command python -ErrorAction SilentlyContinue
-    if (-not $py) { $py = Get-Command python3 -ErrorAction SilentlyContinue }
-    if ($py) { & $py.Source generate-manifest.py } else { Write-Host "    python introuvable" -ForegroundColor Red; exit 1 }
-
-    Write-Host "==> Git commit + push..." -ForegroundColor Cyan
-    git add -A 2>$null
-    git diff --cached --quiet 2>$null
+    git add -A
+    git diff --cached --quiet
     if ($LASTEXITCODE -eq 0) {
-        Write-Host "    Aucun changement a pusher." -ForegroundColor Yellow
+        Write-Host "    Aucun changement à pousser." -ForegroundColor Yellow
     } else {
-        $msg = "sync client ($(Get-Date -Format 'yyyy-MM-dd HH:mm'))"
-        git commit -m $msg | Out-Null
+        git commit -m "Pack client NeoForge 1.21.1 ($(Get-Date -Format 'yyyy-MM-dd HH:mm'))" | Out-Null
         git push
-        Write-Host "==> Push termine. Tes joueurs recuperent la diff au prochain JOUER." -ForegroundColor Green
+        Write-Host "==> Poussé. Les joueurs récupèrent la différence au prochain JOUER." -ForegroundColor Green
     }
 } finally { Pop-Location }

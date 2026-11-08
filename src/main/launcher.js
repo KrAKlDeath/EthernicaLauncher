@@ -5,12 +5,13 @@ const fs = require('fs');
 const { Client } = require('minecraft-launcher-core');
 const config = require('./config');
 const store = require('./store');
+const neoforge = require('./neoforge');
 
 /**
  * Lance Minecraft via minecraft-launcher-core.
  * MCLC gère :
  *   - download MC vanilla (jar + libs + assets + natives)
- *   - install Forge depuis l'installer jar qu'on lui fournit
+ *   - profil NeoForge installé au préalable (neoforge.js), lancé comme version « custom »
  *   - build de la classpath + JVM args
  *   - spawn du process java
  */
@@ -41,7 +42,7 @@ class LauncherRunner {
    * @param {object} opts
    * @param {string} opts.gameDir   Dossier root (.ethernia/)
    * @param {string} opts.javaBin   Chemin javaw.exe
-   * @param {string} opts.forgeJar  Chemin forge-installer.jar
+   * @param {string} opts.versionId Id du profil NeoForge (ex. neoforge-21.1.228)
    * @param {object} opts.auth      Payload mclc-compatible (cf auth.js)
    * @param {function} opts.onProgress
    * @param {function} opts.onClose
@@ -58,14 +59,16 @@ class LauncherRunner {
 
     this._writeServersDat(minecraftDir);
 
+    const jvm = neoforge.jvmArgs(minecraftDir, opts.versionId);
+
     const launchOpts = {
       authorization: opts.auth,
       root: minecraftDir,
       version: {
         number: config.MC_VERSION,
         type: 'release',
+        custom: opts.versionId,
       },
-      forge: opts.forgeJar,
       memory: {
         max: `${ramGb}G`,
         min: `${Math.max(2, Math.floor(ramGb / 2))}G`,
@@ -74,10 +77,10 @@ class LauncherRunner {
       overrides: {
         detached: !store.get('closeOnLaunch'),
         gameDirectory: minecraftDir,
-        directory: minecraftDir,
         cwd: minecraftDir,
       },
-      customArgs: extra ? extra.split(/\s+/) : [],
+      // Arguments du profil NeoForge (module path…) puis ceux du joueur
+      customArgs: jvm.concat(extra ? extra.split(/\s+/) : []),
     };
 
     return this.client.launch(launchOpts);

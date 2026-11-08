@@ -12,7 +12,7 @@ async function init() {
   meta = await api.meta();
   $('#meta-launcher').textContent = meta.version;
   $('#meta-mc').textContent = meta.mcVersion;
-  $('#meta-forge').textContent = meta.forgeVersion;
+  $('#meta-forge').textContent = meta.loaderVersion;
   $('#meta-server').textContent = `${meta.serverHost}:${meta.serverPort}`;
   $('#news-version').textContent = meta.version;
   document.title = `Ethernia Launcher v${meta.version}`;
@@ -203,9 +203,11 @@ function stepLabel(step) {
     case 'cleaning-stale':          return 'Nettoyage';
     case 'downloading-java':        return 'Téléchargement de Java 21';
     case 'extracting-java':         return 'Extraction de Java';
-    case 'downloading-forge-installer': return 'Téléchargement de Forge';
+    case 'downloading-neoforge-installer': return 'Téléchargement de NeoForge';
+    case 'installing-neoforge':     return 'Installation de NeoForge (première fois, ~1 min)';
     case 'mc-assets':               return 'Téléchargement des assets';
-    case 'mc-classes':              return 'Téléchargement Forge';
+    case 'mc-classes':              return 'Téléchargement des bibliothèques';
+    case 'mc-classes-custom':       return 'Bibliothèques NeoForge';
     case 'mc-natives':              return 'Extraction des natives';
     case 'applying-defaults':       return 'Activation du resourcepack et des shaders';
     case 'launching':               return 'Lancement du jeu';

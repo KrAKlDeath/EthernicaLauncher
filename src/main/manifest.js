@@ -12,15 +12,18 @@ const config = require('./config');
  * Format du manifest.json (voir server/generate-manifest.py) :
  * {
  *   "version": 17,
- *   "minecraft": "1.20.1",
- *   "forge": "1.20.1-47.4.18",
+ *   "minecraft": "1.21.1",
+ *   "neoforge": "21.1.228",
  *   "files": [
- *     { "path": "mods/ethernicaui-0.1.0-forge-1.20.1.jar",
- *       "sha256": "abc...", "size": 123456 },
+ *     { "path": "mods/ethernicaui-0.2.0.jar", "sha256": "abc...", "size": 123456 },
+ *     { "path": "config/iris.properties", "sha256": "...", "size": 120, "once": true },
  *     ...
  *   ],
- *   "managedDirs": ["mods", "config", "resourcepacks"]
+ *   "managedDirs": ["mods", "shaderpacks"]
  * }
+ *
+ * "once" : fichier de réglages fourni au premier lancement seulement (le joueur peut
+ * ensuite le modifier sans qu'il soit écrasé).
  *
  * Les fichiers sont téléchargés depuis FILES_BASE_URL + entry.path.
  * Les fichiers locaux qui ne sont pas dans le manifeste mais qui sont dans
@@ -55,13 +58,15 @@ async function ensureFile(gameDir, entry, progress) {
   await fs.promises.mkdir(path.dirname(dest), { recursive: true });
 
   if (fs.existsSync(dest)) {
+    if (entry.once) return { downloaded: false };
     const localHash = await sha256OfFile(dest);
     if (localHash.toLowerCase() === entry.sha256.toLowerCase()) {
       return { downloaded: false };
     }
   }
 
-  const url = config.FILES_BASE_URL + entry.path;
+  // Chemins avec espaces, apostrophes ou « + » (ex. "L_Ender's Cataclysm…") : on encode chaque segment
+  const url = config.FILES_BASE_URL + entry.path.split('/').map(encodeURIComponent).join('/');
   const res = await axios.get(url, {
     responseType: 'stream',
     timeout: 60000,

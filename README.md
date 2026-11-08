@@ -1,12 +1,12 @@
 # Ethernia Launcher
 
-Launcher Windows custom pour le serveur **Ethernia Arclight 1.20.1**.
+Launcher Windows custom pour le serveur **Ethernia (NeoForge 1.21.1)**.
 
 - UI restreinte (onglets **Jouer** + **Paramètres**)
 - Auth Microsoft officielle (OAuth)
 - Auto-update via **GitHub Releases** (zéro infra)
 - Sync mods/configs depuis un repo GitHub (raw URL ou Releases)
-- Téléchargement auto Java 21 et Forge 1.20.1-47.4.18
+- Téléchargement auto Java 21 et installation de NeoForge 21.1.228 (installeur officiel, sans fenêtre)
 - Serveur Ethernia pré-ajouté à la liste multijoueur
 
 > **Tu démarres ?** Lis [BIENVENUE.md](BIENVENUE.md), c'est le pas-à-pas en 5 étapes.
@@ -26,10 +26,11 @@ EthernicaClient/                     Launcher au démarrage :
   ├ manifest.json           ───────► 1. fetch manifest.json
   ├ mods/*.jar              ───────► 2. diff hash SHA-256 par fichier
   ├ config/                          3. DL ce qui manque, supprime obsolète
-  └ resourcepacks/                   4. install Java 21 + Forge, launch MC
+  ├ shaderpacks/                     4. install Java 21 + NeoForge, launch MC
+  └ config/, options.txt (1er lancement seulement)
 
 [Ton PC / VPS futur]
-Serveur Minecraft (Arclight)  ◄──── Joueur via servers.dat pré-rempli
+Serveur Minecraft (NeoForge)  ◄──── Joueur via servers.dat pré-rempli
 ```
 
 **Aucun serveur HTTP à gérer.** Tout passe par 2 repos GitHub (gratuit, illimité, CDN mondial).
@@ -44,7 +45,8 @@ Serveur Minecraft (Arclight)  ◄──── Joueur via servers.dat pré-rempli
 | electron-builder | Build de l'installeur NSIS Windows |
 | electron-updater | Auto-update via GitHub Releases |
 | msmc | OAuth Microsoft → token Minecraft |
-| minecraft-launcher-core | Install + launch MC + Forge |
+| minecraft-launcher-core | Téléchargement + lancement de MC (profil NeoForge en version « custom ») |
+| `neoforge.js` | Installeur NeoForge `--installClient` + arguments Java du profil (module path…) que MCLC ignore |
 | axios, extract-zip | DL / unzip Java |
 
 ---
@@ -82,7 +84,7 @@ Plus une ligne dans `electron-builder.yml` (section `publish.owner`).
 | Script | Rôle |
 |--------|------|
 | `server/init-repos.ps1` | Crée les 2 repos GitHub + sync initiale des mods (une seule fois) |
-| `server/sync-mods.ps1` | Push de nouveaux mods vers le repo client (workflow quotidien) |
+| `server/sync-mods.ps1` | Copie `Desktop\Ethernia\client-pack` dans le repo client, régénère le manifeste, push (`-NoPush` pour tester) |
 | `server/publish.ps1` | Build + publish nouvelle version launcher sur GitHub Releases |
 | `server/generate-manifest.py` | Régénère `manifest.json` avec les hashs (appelé par sync-mods.ps1) |
 
@@ -94,10 +96,13 @@ Plus une ligne dans `electron-builder.yml` (section `publish.owner`).
 Voir [BIENVENUE.md](BIENVENUE.md) — 5 étapes, ~30 min.
 
 ### Mettre à jour les mods
+Mets le pack à jour dans `Desktop\Ethernia\client-pack` (mods, shaderpacks, config, `options-ethernia.txt`), puis :
 ```powershell
+git clone https://github.com/KrAKlDeath/EthernicaClient ..\client-repo   # une seule fois
 .\server\sync-mods.ps1
 ```
-Les joueurs récupèrent la diff au prochain clic JOUER.
+Les joueurs récupèrent la diff au prochain clic JOUER. Seul `mods/` est « géré » (un mod retiré du pack
+est supprimé chez les joueurs) ; `config/` et `options.txt` ne sont fournis qu'au premier lancement.
 
 ### Mettre à jour le launcher
 1. Bump version dans `package.json`
@@ -120,7 +125,7 @@ Les joueurs voient un bandeau "Mise à jour disponible".
   │   ├── saves\         (sauvegardes solo, intacts)
   │   └── servers.dat    (pré-rempli avec ton serveur)
   ├── runtime\java21\    (~80 MB Temurin)
-  └── cache\forge-*-installer.jar
+  └── cache\neoforge-*-installer.jar
 ```
 
 ---
@@ -186,7 +191,7 @@ EthernicaLauncher/
     │   ├── auth.js         ← msmc OAuth Microsoft
     │   ├── manifest.js     ← sync depuis GitHub raw URLs
     │   ├── java.js         ← DL Temurin 21
-    │   ├── forge.js        ← DL forge-installer.jar
+    │   ├── neoforge.js     ← installe NeoForge + arguments Java du profil
     │   ├── launcher.js     ← MCLC + servers.dat
     │   ├── updater.js      ← electron-updater + GitHub Releases
     │   ├── ipc.js          ← handlers renderer ↔ main

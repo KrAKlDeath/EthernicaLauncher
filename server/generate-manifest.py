@@ -4,9 +4,9 @@ Génère manifest.json pour le repo EthernicaClient.
 
 Workflow :
   1. Tu as un repo Git local "EthernicaClient" qui contient :
-       mods/         ← .jar des 47 mods Forge
-       config/       ← configs des mods
-       resourcepacks/← packs de textures éventuels
+       mods/         ← .jar des mods NeoForge (supprimés chez le joueur s'ils disparaissent)
+       shaderpacks/  ← shaders
+       config/, options.txt ← réglages fournis au 1er lancement ("once")
   2. Tu lances ce script depuis ce repo :
        python3 generate-manifest.py
   3. Il produit manifest.json à la racine.
@@ -23,13 +23,20 @@ import json
 import sys
 from pathlib import Path
 
-# Dossiers gérés par le launcher (relatifs au .minecraft client).
-# Tout fichier local qui est dans ces dossiers mais ABSENT du manifeste
-# sera supprimé côté client.
-MANAGED_DIRS = ["mods", "config", "resourcepacks"]
+# Dossiers analysés (relatifs au .minecraft client) et fichiers isolés.
+SCAN_DIRS = ["mods", "shaderpacks", "resourcepacks", "config"]
+SCAN_FILES = ["options.txt"]
 
-MC_VERSION = "1.20.1"
-FORGE_VERSION = "1.20.1-47.4.18"
+# Dossiers gérés : tout fichier local ABSENT du manifeste y est supprimé côté
+# joueur (sinon les anciens mods resteraient chargés).
+MANAGED_DIRS = ["mods"]
+
+# Réglages fournis au premier lancement seulement : le joueur peut ensuite les
+# modifier (shader, options graphiques, configs de mods) sans qu'ils soient écrasés.
+ONCE_PREFIXES = ["config/", "options.txt"]
+
+MC_VERSION = "1.21.1"
+NEOFORGE_VERSION = "21.1.228"
 
 
 def sha256(path: Path) -> str:
@@ -40,9 +47,17 @@ def sha256(path: Path) -> str:
     return h.hexdigest()
 
 
+def entry(root: Path, full: Path) -> dict:
+    rel = full.relative_to(root).as_posix()
+    e = {"path": rel, "sha256": sha256(full), "size": full.stat().st_size}
+    if any(rel == p or (p.endswith("/") and rel.startswith(p)) for p in ONCE_PREFIXES):
+        e["once"] = True
+    return e
+
+
 def scan(root: Path) -> list[dict]:
     files = []
-    for d in MANAGED_DIRS:
+    for d in SCAN_DIRS:
         base = root / d
         if not base.exists():
             continue
@@ -52,12 +67,14 @@ def scan(root: Path) -> list[dict]:
             # Ignore les fichiers cachés et les fichiers Git
             if any(part.startswith(".") for part in full.relative_to(root).parts):
                 continue
-            rel = full.relative_to(root).as_posix()
-            files.append({
-                "path": rel,
-                "sha256": sha256(full),
-                "size": full.stat().st_size,
-            })
+            files.append(entry(root, full))
+    for name in SCAN_FILES:
+        full = root / name
+        if full.is_file():
+            files.append(entry(root, full))
+    big = [f for f in files if f["size"] > 100 * 1024 * 1024]
+    if big:
+        raise SystemExit("[manifest] fichiers > 100 Mo refusés par GitHub : " + ", ".join(f["path"] for f in big))
     files.sort(key=lambda f: f["path"])
     return files
 
@@ -79,7 +96,7 @@ def main() -> int:
     manifest = {
         "version": prev_version + 1,
         "minecraft": MC_VERSION,
-        "forge": FORGE_VERSION,
+        "neoforge": NEOFORGE_VERSION,
         "managedDirs": MANAGED_DIRS,
         "files": files,
     }

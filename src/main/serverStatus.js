@@ -15,6 +15,7 @@
 
 const net = require('net');
 const dns = require('dns').promises;
+const config = require('./config');
 
 function writeVarInt(val) {
   const buf = [];
@@ -86,7 +87,7 @@ async function pingMcServer(host, port, timeoutMs = 5000) {
       // Packet 0x00 Handshake
       const handshakeData = Buffer.concat([
         writeVarInt(0x00),           // packet ID
-        writeVarInt(763),             // protocol version 1.20.1 = 763
+        writeVarInt(config.MC_PROTOCOL), // protocole de la version (1.21.1 = 767)
         writeString(target.host),
         Buffer.from([(target.port >> 8) & 0xFF, target.port & 0xFF]),
         writeVarInt(1),               // next state = status

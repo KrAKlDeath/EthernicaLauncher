@@ -73,18 +73,17 @@ function applyShaderPack(mcDir) {
   const spFiles = listZipFiles(spDir);
   if (spFiles.length === 0) return false;
 
-  // Oculus / Iris stockent leur config dans config/oculus.properties
-  // (ou config/iris.properties si Iris mod, mais on est sur Forge donc Oculus)
+  // Iris (NeoForge 1.21.1) stocke sa config dans config/iris.properties
   const candidates = [
-    path.join(mcDir, 'config', 'oculus.properties'),
     path.join(mcDir, 'config', 'iris.properties'),
+    path.join(mcDir, 'config', 'oculus.properties'),
   ];
 
   let configPath = null;
   for (const c of candidates) {
     if (fs.existsSync(c)) { configPath = c; break; }
   }
-  if (!configPath) configPath = candidates[0]; // creation par defaut sur Oculus
+  if (!configPath) configPath = candidates[0]; // creation par defaut pour Iris
 
   let config = readFileOr(configPath, '');
 
